@@ -4,15 +4,20 @@
   "description": "Pub-Sub messaging queue",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "serve": "nodemon ./app.js",
+    "build": "webpack"
   },
   "author": "Kushagra Gupta",
   "license": "Apache-2.0",
   "dependencies": {
     "dotenv": "^16.0.3",
-    "express": "^4.18.2"
+    "express": "^4.18.2",
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
-    "nodemon": "^2.0.20"
+    "clean-webpack-plugin": "^4.0.0",
+    "nodemon": "^2.0.20",
+    "webpack": "^5.75.0",
+    "webpack-node-externals": "^3.0.0"
   }
 }
