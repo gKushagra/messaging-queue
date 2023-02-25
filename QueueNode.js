@@ -3,9 +3,9 @@ class QueueNode {
     message;
     next;
 
-    constructor(message, next) {
+    constructor(message) {
         this.message = message;
-        this.next = next;
+        this.next = null;
     }
 }
 

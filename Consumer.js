@@ -7,7 +7,7 @@ class Consumer {
     constructor(id, clientSecret, queue) {
         this.id = id;
         this.clientSecret = clientSecret;
-        this.queues = queue;
+        this.queue = queue;
     }
 }
 

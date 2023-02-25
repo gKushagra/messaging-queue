@@ -7,24 +7,27 @@ class MessageQueue {
 
     constructor(name) {
         this.name = name;
+        this.root = null;
     }
 
     Enqueue(message) {
-        var node = new QueueNode(message);
-        node.next = null;
-        if (this.root == null) {
-            this.root = node;
-        } else {
-            var curr = this.root;
-            while (curr != null) {
-                curr = curr.next;
-            }
-            curr = node;
+        if (this.root === null) {
+            this.root = new QueueNode(message);
+            return;
         }
+        if (this.root.next === null) {
+            this.root.next = new QueueNode(message);
+            return;
+        }
+        var currNode = this.root;
+        while(currNode.next !== null) {
+            currNode = currNode.next;
+        }
+        currNode.next = new QueueNode(message);
     }
 
     Dequeue() {
-        if (this.root !== null) {
+        if (this.root != null) {
             var node = this.root;
             this.root = this.root.next;
             return node.message;

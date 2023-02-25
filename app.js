@@ -68,15 +68,16 @@ app.post('/queues/:queue/consumers', function (req, res, next) {
 // publish
 app.post('/queues/:queue/messages', function (req, res, next) {
     try {
-        var queues = consumers.findAll(c => c.queue.name === req.params.queue);
-        if (queues.length > 0) {
-            for (var q in queues) {
-                q.Enqueue(req.body.message);
+        var activeConsumers = consumers.filter(c => c.queue.name === req.params.queue);
+        if (activeConsumers.length > 0) {
+            for (let i = 0; i < activeConsumers.length; i++) {
+                console.log(activeConsumers[i]);
+                activeConsumers[i].queue.Enqueue(req.body.message);
             }
         }
         var queue = queues.find(q => q.name === req.params.queue);
         if (!queue) {
-            queues.push(req.params.queue);
+            queue.Enqueue(req.params.queue);
         }
         res.sendStatus(200);
     } catch (error) {
@@ -92,7 +93,7 @@ app.get('/queues/:queue/consumers/:id/messages', function (req, res, next) {
         var queue = queues.find(q => q.name === req.params.queue);
         var consumer = consumers.find(c => c.id === req.params.id && c.queue.name === req.params.queue);
         if (queue && consumer) {
-            var message = queue.Dequeue();
+            var message = consumer.queue.Dequeue();
             message ? res.status(200).json(message) : res.sendStatus(204);
         } else {
             res.sendStatus(204);
