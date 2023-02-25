@@ -1,0 +1,18 @@
+{
+  "name": "message-queue",
+  "version": "1.0.0",
+  "description": "Pub-Sub messaging queue",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Kushagra Gupta",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.20"
+  }
+}
