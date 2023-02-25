@@ -1,4 +1,6 @@
-class Queue {
+const QueueNode = require("./QueueNode");
+
+class MessageQueue {
 
     name;
     root;
@@ -31,3 +33,5 @@ class Queue {
         }
     }
 }
+
+module.exports = MessageQueue;

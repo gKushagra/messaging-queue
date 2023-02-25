@@ -8,3 +8,5 @@ class QueueNode {
         this.next = next;
     }
 }
+
+module.exports = QueueNode;

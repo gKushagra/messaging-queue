@@ -7,6 +7,8 @@ class Consumer {
     constructor(id, clientSecret, queue) {
         this.id = id;
         this.clientSecret = clientSecret;
-        this.queue = queue;
+        this.queues = queue;
     }
 }
+
+module.exports = Consumer;

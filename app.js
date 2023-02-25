@@ -1,6 +1,8 @@
 require('dotenv').config();
 const express = require('express');
 const { v4: uuid } = require('uuid');
+const Consumer = require('./Consumer');
+const MessageQueue = require('./MessageQueue');
 const PORT = process.env.PORT;
 
 const app = express();
@@ -10,23 +12,9 @@ app.use(express.urlencoded({ extended: false }));
 
 // TODO check if data directory exists, create if not exists
 
-// In-memory queues
-var consumers = [];
-var queues = [];
-
-// consumers
-app.post('/queues/:queue/consumers', function (req, res, next) {
-    try {
-        var consumer = consumers.find(c =>
-            c.clientSecret === req.body.clientSecret && c.queue === req.params.queue);
-        consumer = new Consumer(uuid(), req.body.clientSecret, req.params.queue);
-        consumers.push(consumer);
-        res.status(200).json(consumer.id);
-    } catch (error) {
-        console.error('An error occurred', error);
-        res.sendStatus(500);
-    }
-});
+// In-memory objects
+var consumers = []; // current consumers
+var queues = [];    // use this to dump data
 
 // queues
 app.get('/queues', function (req, res, next) {
@@ -42,7 +30,7 @@ app.get('/queues', function (req, res, next) {
 
 app.post('/queues/:queue', function (req, res, next) {
     try {
-        var queue = new Queue(req.params.queue);
+        var queue = new MessageQueue(req.params.queue);
         queues.push(queue);
         res.sendStatus(200);
     } catch (error) {
@@ -61,11 +49,35 @@ app.delete('/queues/:queue', function (req, res, next) {
     }
 });
 
+// register consumer
+app.post('/queues/:queue/consumers', function (req, res, next) {
+    try {
+        var consumer = consumers.find(c =>
+            c.clientSecret === req.body.clientSecret && c.queue === req.params.queue);
+        if (!consumer) {
+            consumer = new Consumer(uuid(), req.body.clientSecret, new MessageQueue(req.params.queue));
+            consumers.push(consumer);
+        }
+        res.status(200).json(consumer.id);
+    } catch (error) {
+        console.error('An error occurred', error);
+        res.sendStatus(500);
+    }
+});
+
 // publish
 app.post('/queues/:queue/messages', function (req, res, next) {
     try {
+        var queues = consumers.findAll(c => c.queue.name === req.params.queue);
+        if (queues.length > 0) {
+            for (var q in queues) {
+                q.Enqueue(req.body.message);
+            }
+        }
         var queue = queues.find(q => q.name === req.params.queue);
-        queue.Enqueue(req.body.message);
+        if (!queue) {
+            queues.push(req.params.queue);
+        }
         res.sendStatus(200);
     } catch (error) {
         console.error('An error occurred', error);
@@ -76,20 +88,12 @@ app.post('/queues/:queue/messages', function (req, res, next) {
 // consume
 app.get('/queues/:queue/consumers/:id/messages', function (req, res, next) {
     try {
+        // check if valid queue and consumer
         var queue = queues.find(q => q.name === req.params.queue);
-        if (queue) {
-            // check if valid consumer
-            var consumer = consumers.find(c => c.id === req.params.id && c.queue === req.params.queue);
-            if (consumer) {
-                var message = queue.Dequeue();
-                if (message != null) {
-                    res.status(200).json(message);
-                } else {
-                    res.sendStatus(204);
-                }
-            } else {
-                res.sendStatus(204);
-            }
+        var consumer = consumers.find(c => c.id === req.params.id && c.queue.name === req.params.queue);
+        if (queue && consumer) {
+            var message = queue.Dequeue();
+            message ? res.status(200).json(message) : res.sendStatus(204);
         } else {
             res.sendStatus(204);
         }
